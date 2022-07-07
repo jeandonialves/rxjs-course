@@ -1,17 +1,17 @@
-import { Store } from "./../common/store.service";
 import {
   AfterViewInit,
   Component,
   ElementRef,
   OnInit,
-  ViewChild,
+  ViewChild
 } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { forkJoin, fromEvent, Observable } from "rxjs";
-import { first, map, tap } from "rxjs/operators";
+import { map, take, tap } from "rxjs/operators";
 import { createHttpObservable } from "../common/util";
 import { Course } from "../model/course";
 import { Lesson } from "../model/lesson";
+import { Store } from "./../common/store.service";
 
 @Component({
   selector: "course",
@@ -31,7 +31,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.courseId = this.route.snapshot.params["id"];
 
-    this.course$ = this.store.selectCourseById(this.courseId).pipe(first());
+    this.course$ = this.store.selectCourseById(this.courseId).pipe(take(1));
 
     forkJoin(this.course$, this.loadLessons())
       .pipe(

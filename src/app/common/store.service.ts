@@ -32,6 +32,14 @@ export class Store {
     return this.filterByCategory("ADVANCED");
   }
 
+  selectCourseById(courseId: number): Observable<Course> {
+    return this.courses$.pipe(
+      map((courses: Course[]) =>
+        courses.find((courses) => courses.id === courseId)
+      )
+    );
+  }
+
   filterByCategory(category: string) {
     return this.courses$.pipe(
       map((courses: Course[]) =>

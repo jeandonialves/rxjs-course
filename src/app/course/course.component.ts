@@ -1,3 +1,4 @@
+import { Store } from './../common/store.service';
 import {
   AfterViewInit,
   Component,
@@ -6,26 +7,11 @@ import {
   ViewChild,
 } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { Course } from "../model/course";
-import {
-  debounceTime,
-  distinctUntilChanged,
-  startWith,
-  tap,
-  delay,
-  map,
-  concatMap,
-  switchMap,
-  withLatestFrom,
-  concatAll,
-  shareReplay,
-  throttle,
-  throttleTime,
-} from "rxjs/operators";
-import { merge, fromEvent, Observable, concat, interval, forkJoin } from "rxjs";
-import { Lesson } from "../model/lesson";
+import { forkJoin, fromEvent, Observable } from "rxjs";
+import { map, tap } from "rxjs/operators";
 import { createHttpObservable } from "../common/util";
-import { debug, RxJsLoggingLevel, setRxJsLogginLevel } from "../common/debug";
+import { Course } from "../model/course";
+import { Lesson } from "../model/lesson";
 
 @Component({
   selector: "course",
@@ -33,29 +19,30 @@ import { debug, RxJsLoggingLevel, setRxJsLogginLevel } from "../common/debug";
   styleUrls: ["./course.component.css"],
 })
 export class CourseComponent implements OnInit, AfterViewInit {
-  courseId: string;
+  courseId: number;
 
   course$: Observable<Course>;
   lessons$: Observable<Lesson[]>;
 
   @ViewChild("searchInput", { static: true }) input: ElementRef;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute, private store: Store) {}
 
   ngOnInit() {
     this.courseId = this.route.snapshot.params["id"];
 
-    this.course$ = createHttpObservable(`/api/courses/${this.courseId}`);
+    this.course$ = this.store.selectCourseById(this.courseId);
 
     const lessons$ = this.loadLessons();
 
-    forkJoin(this.course$, lessons$).pipe(
-      tap(([course, lessons]) => {
-
-        console.log('course', course);
-        console.log('lessons', lessons);
-      })
-    ).subscribe();
+    forkJoin(this.course$, lessons$)
+      .pipe(
+        tap(([course, lessons]) => {
+          console.log("course", course);
+          console.log("lessons", lessons);
+        })
+      )
+      .subscribe();
   }
 
   ngAfterViewInit() {

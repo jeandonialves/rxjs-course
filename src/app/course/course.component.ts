@@ -1,4 +1,4 @@
-import { Store } from './../common/store.service';
+import { Store } from "./../common/store.service";
 import {
   AfterViewInit,
   Component,
@@ -8,7 +8,7 @@ import {
 } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { forkJoin, fromEvent, Observable } from "rxjs";
-import { map, tap } from "rxjs/operators";
+import { first, map, tap } from "rxjs/operators";
 import { createHttpObservable } from "../common/util";
 import { Course } from "../model/course";
 import { Lesson } from "../model/lesson";
@@ -31,11 +31,9 @@ export class CourseComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.courseId = this.route.snapshot.params["id"];
 
-    this.course$ = this.store.selectCourseById(this.courseId);
+    this.course$ = this.store.selectCourseById(this.courseId).pipe(first());
 
-    const lessons$ = this.loadLessons();
-
-    forkJoin(this.course$, lessons$)
+    forkJoin(this.course$, this.loadLessons())
       .pipe(
         tap(([course, lessons]) => {
           console.log("course", course);

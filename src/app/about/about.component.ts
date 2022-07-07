@@ -1,7 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { BehaviorSubject, concat, interval, merge, of, Subject } from "rxjs";
-import { map } from "rxjs/operators";
-import { createHttpObservable } from "../common/util";
+import { AsyncSubject, Subject } from "rxjs";
 
 @Component({
   selector: "about",
@@ -12,18 +10,19 @@ export class AboutComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    const subject = new BehaviorSubject(0);
+    const subject = new AsyncSubject();
     const series$ = subject.asObservable();
 
-    series$.subscribe(val => console.log('early sub:' + val));
+    series$.subscribe(val => console.log('first sub:' + val));
 
     subject.next(1);
     subject.next(2);
     subject.next(3);
-    // subject.complete();
+    subject.complete();
 
     setTimeout(() => {
-      series$.subscribe(val => console.log('late sub:' + val));
+      series$.subscribe(val => console.log('second sub:' + val));
     }, 3000);
   }
+
 }
